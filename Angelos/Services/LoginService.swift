@@ -1,0 +1,55 @@
+import Foundation
+import SwiftUI
+internal import Combine
+
+class LoginService: ObservableObject {
+
+    @Published var name: String = ""
+    @Published var password: String = ""
+
+    @Published var isLoading = false
+    @Published var isLoggedIn = false
+    @Published var showMessage = false
+    @Published var messageText = ""
+    
+    
+    
+    func logout() {
+        isLoggedIn = false
+    }
+
+    func login() {
+
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedPassword = password.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !trimmedName.isEmpty, !trimmedPassword.isEmpty else {
+            messageText = "Please enter name and password."
+            showMessage = true
+            return
+        }
+
+        isLoading = true
+
+        AuthService.shared.login(name: trimmedName, password: trimmedPassword) { result in
+            DispatchQueue.main.async {
+                self.isLoading = false
+
+                switch result {
+                case .success(let response):
+                    if response.status == "success", let user = response.user {
+                        LogoutService.shared.login(user: user)
+                        self.isLoggedIn = true
+                    } else {
+                        self.messageText = "Login failed: \(response.message)"
+                        self.showMessage = true
+                    }
+
+                case .failure(let error):
+                    self.messageText = "Error: \(error.localizedDescription)"
+                    self.showMessage = true
+                }
+            }
+        }
+    }
+}
