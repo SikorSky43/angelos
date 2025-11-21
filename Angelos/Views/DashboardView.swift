@@ -8,6 +8,9 @@ struct DashboardView: View {
     @State private var showCardDetails = false
     @State private var showDepositPopup = false   // NEW POPUP STATE
     @State private var showLogoutMessage = false
+    @StateObject private var logoutService = LogoutService.shared
+    @State private var liveBalance = "£0.00"
+    @State private var loadingBalance = true
 
     let balance = "£2,384.22"
     let status = "Updated just now"
@@ -49,20 +52,21 @@ struct DashboardView: View {
             }
             .background(Color.black.ignoresSafeArea())
             .toolbar { TopToolbar(showCardDetails: $showCardDetails,
-                                 showDepositPopup: $showDepositPopup) } // UPDATED
+                                 showDepositPopup: $showDepositPopup ,onLogout: handleLogout
+) } // UPDATED
         }
 
         // Existing CardDetails Screen
         .fullScreenCover(isPresented: $showCardDetails) {
             NavigationStack {
-                CardDetailsView()
+                CardDetails()
                     .transition(.move(edge: .leading))
             }
         }
 
         // NEW Deposit Popup
         .fullScreenCover(isPresented: $showDepositPopup) {
-            DepositPopupView(showDepositPopup: $showDepositPopup)
+            DepositPopup(showDepositPopup: $showDepositPopup)
         }
         
         .alert("Logout", isPresented: $showLogoutMessage) {
@@ -72,4 +76,12 @@ struct DashboardView: View {
         }
 
     }
+    // ------------------------------------------------------
+        // MARK: - LOGOUT HANDLER (CALLS AUTHSERVICE)
+        // ------------------------------------------------------
+        private func handleLogout() {
+            AuthService.shared.logout {
+                showLogoutMessage = true
+            }
+       }
 }

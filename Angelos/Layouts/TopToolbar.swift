@@ -1,12 +1,10 @@
-// ------------------------------------------------------
-// MARK: - Top Toolbar
-// ------------------------------------------------------
-import Foundation
 import SwiftUI
+
 struct TopToolbar: ToolbarContent {
 
     @Binding var showCardDetails: Bool
     @Binding var showDepositPopup: Bool
+    let onLogout: () -> Void   // NEW CALLBACK
 
     var body: some ToolbarContent {
 
@@ -22,6 +20,7 @@ struct TopToolbar: ToolbarContent {
         }
 
         ToolbarItemGroup(placement: .navigationBarTrailing) {
+
             Button {
                 withAnimation(.easeInOut(duration: 0.28)) {
                     showCardDetails = true
@@ -30,17 +29,18 @@ struct TopToolbar: ToolbarContent {
                 Image(systemName: "creditcard")
             }
 
-            Button {} label: { Image(systemName: "magnifyingglass") }
+            Button {} label: {
+                Image(systemName: "magnifyingglass")
+            }
+
+            // LOGOUT BUTTON
             Button {
-                LogoutService.shared.logout()
+                onLogout()
             } label: {
                 Image(systemName: "rectangle.portrait.and.arrow.right")
                     .font(.title2)
                     .foregroundColor(.white)
             }
-
         }
     }
 }
-
-

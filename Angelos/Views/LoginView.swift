@@ -3,6 +3,7 @@ import SwiftUI
 struct LoginView: View {
 
     @StateObject private var vm = LoginService()
+    @State private var showForgotPassword = false     // ← NEW
 
     var body: some View {
         NavigationStack {
@@ -35,7 +36,12 @@ struct LoginView: View {
                     }
                     .padding(.horizontal, 28)
 
-                    Button { } label: {
+                    // ------------------------------------------------------
+                    // MARK: - Forgot Password Button (NEW)
+                    // ------------------------------------------------------
+                    Button {
+                        showForgotPassword = true
+                    } label: {
                         Text("Forgot password?")
                             .foregroundColor(.blue)
                             .font(.callout)
@@ -52,6 +58,23 @@ struct LoginView: View {
             } message: {
                 Text(vm.messageText)
             }
+
+            // ------------------------------------------------------
+            // MARK: - Forgot Password ALERT (NEW)
+            // ------------------------------------------------------
+            .alert("Reset Your Password", isPresented: $showForgotPassword) {
+                
+                // OPEN MAIL APP
+                Button("Send Email") {
+                    vm.sendForgotPasswordEmail()
+                }
+
+                Button("Cancel", role: .cancel) {}
+                
+            } message: {
+                Text("To reset your password, send an email to:\nHelpme@angeloscapital.com")
+            }
+
             .navigationDestination(isPresented: $vm.isLoggedIn) {
                 DashboardView()
             }
@@ -88,4 +111,6 @@ struct LoginView: View {
         .padding(.horizontal, 28)
         .disabled(vm.isLoading)
     }
+
+
 }

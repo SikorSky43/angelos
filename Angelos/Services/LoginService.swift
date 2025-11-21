@@ -51,5 +51,22 @@ class LoginService: ObservableObject {
                 }
             }
         }
+        
+        
+    }
+    // ------------------------------------------------------
+    // MARK: - Forgot Password Email Function (NEW)
+    // ------------------------------------------------------
+   func sendForgotPasswordEmail() {
+        let email = "Helpme@angeloscapital.com"   // ← PUT YOUR EMAIL HERE
+        let subject = "Password Reset Request"
+        let body = "Hello,\n\nI need help resetting my password."
+
+        let encoded = "mailto:\(email)?subject=\(subject)&body=\(body)"
+            .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
+
+        if let url = URL(string: encoded) {
+            UIApplication.shared.open(url)
+        }
     }
 }

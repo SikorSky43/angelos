@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct DepositPopupView: View {
+struct DepositPopup: View {
     @Binding var showDepositPopup: Bool
     @State private var selectedCoin = "USDT"
     @State private var copiedToast = false

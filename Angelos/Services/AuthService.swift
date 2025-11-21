@@ -1,10 +1,11 @@
 import Foundation
+
 // MARK: - Auth Service
 class AuthService {
-    
+
     static let shared = AuthService()
     private init() { }
-    
+
     func login(name: String, password: String, completion: @escaping (Result<responsedata, Error>) -> Void) {
         guard let url = URL(string: "https://angeloscapital.com/api/login.php") else { return }
 
@@ -42,5 +43,13 @@ class AuthService {
                 DispatchQueue.main.async { completion(.failure(error)) }
             }
         }.resume()
+    }
+
+    // ------------------------------------------------------
+    // MARK: - LOGOUT HANDLER (NEW)
+    // ------------------------------------------------------
+    func logout(completion: (() -> Void)? = nil) {
+        LogoutService.shared.logout()
+        completion?()
     }
 }

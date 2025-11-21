@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct CardDetailsView: View {
+struct CardDetails: View {
     @Environment(\.dismiss) var dismiss   // ← needed to close the sheet
 
     var body: some View {
