@@ -1,8 +1,15 @@
-//
-//  HistoryItem.swift
-//  Angelos
-//
-//  Created by BlackBird on 22/11/25.
-//
-
 import Foundation
+
+nonisolated struct HistoryItem: Codable, Identifiable {
+    let id = UUID()               // <-- local ID for SwiftUI
+    let type: String
+    let date: String
+    let time: String
+    let deposit: String
+    let assests: String
+    
+
+    enum CodingKeys: String, CodingKey {
+        case type, date, time, deposit, assests
+    }
+}

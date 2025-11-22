@@ -12,8 +12,6 @@ class LoginService: ObservableObject {
     @Published var showMessage = false
     @Published var messageText = ""
     
-    
-    
     func logout() {
         isLoggedIn = false
     }
@@ -38,9 +36,21 @@ class LoginService: ObservableObject {
                 switch result {
                 case .success(let response):
                     if response.status == "success", let user = response.user {
+
+                        // 🔥 SAVE USERNAME SO DASHBOARD CAN LOAD BALANCE
+                        UserDefaults.standard.set(user.name, forKey: "username")
+                        
+                        // SAVE WALLET ADDRESS HERE
+                        UserDefaults.standard.set(user.wallet_address ?? "", forKey: "wallet_address")
+
+                        // Save user globally
                         LogoutService.shared.login(user: user)
+
                         self.isLoggedIn = true
-                    } else {
+
+                    }
+                    
+                    else {
                         self.messageText = "Login failed: \(response.message)"
                         self.showMessage = true
                     }
@@ -51,14 +61,13 @@ class LoginService: ObservableObject {
                 }
             }
         }
-        
-        
     }
+
     // ------------------------------------------------------
     // MARK: - Forgot Password Email Function (NEW)
     // ------------------------------------------------------
-   func sendForgotPasswordEmail() {
-        let email = "Helpme@angeloscapital.com"   // ← PUT YOUR EMAIL HERE
+    func sendForgotPasswordEmail() {
+        let email = "Helpme@angeloscapital.com"
         let subject = "Password Reset Request"
         let body = "Hello,\n\nI need help resetting my password."
 

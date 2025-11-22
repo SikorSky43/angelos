@@ -1,87 +1,113 @@
-//
-//  Transaction.swift
-//  Angelos
-//
-//  Created by BlackBird on 20/11/25.
-//
-
-import Foundation
 import SwiftUI
 
-
-
-// ------------------------------------------------------
-// MARK: - Transaction List
-// ------------------------------------------------------
-
 struct TransactionList: View {
-
-    // NOTE for backend:
-    // This should be converted to a model later.
-    let tx = [
-        ("Savings", "Transfer", "2 hours ago", "£0.25"),
-        ("M&S Football", "Pending", "2 hours ago", "£10.75"),
-        ("Savings", "Transfer", "3 hours ago", "£0.39"),
-        ("ASDA", "Reading", "3 hours ago", "£3.61")
-    ]
+    @ObservedObject var historyComp = HistoryComp.shared
+    
+    var visibleHistory: [HistoryItem] {
+        Array(historyComp.items.prefix(historyComp.visibleCount))
+    }
 
     var body: some View {
         VStack(spacing: 0) {
 
-            ForEach(tx.indices, id: \.self) { i in
-                let item = tx[i]
-
+            // MARK: - Transactions
+            ForEach(visibleHistory) { item in
                 HStack(spacing: 14) {
 
-                    // Leading icon with first letter
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .fill(Color(UIColor.systemGray5))
+                    // Asset image instead of letter box
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.gray.opacity(0.2))
                         .frame(width: 52, height: 52)
                         .overlay(
-                            Text(String(item.0.prefix(1)))
-                                .font(.title3).bold()
-                                .foregroundColor(.white)
+                            AsyncImage(url: URL(string: item.assests)) { phase in
+                                switch phase {
+                                case .empty:
+                                    ProgressView()
+                                        .tint(.white)
+
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .scaledToFit()
+
+                                case .failure(_):
+                                    Image(systemName: "photo")
+                                        .foregroundColor(.gray)
+
+                                @unknown default:
+                                    EmptyView()
+                                }
+                            }
+                            .padding(6)
                         )
 
-                    // Labels
+
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(item.0)
-                            .font(.headline)
+                        Text(item.type)
                             .foregroundColor(.white)
+                            .font(.headline)
 
-                        Text(item.1)
-                            .font(.subheadline)
+                    
+                        Text("\(formatDate(item.date)) • Time: \(item.time)")
                             .foregroundColor(.gray)
-
-                        Text(item.2)
                             .font(.caption)
-                            .foregroundColor(.gray)
                     }
 
                     Spacer()
 
-                    // Amount + Chevron
-                    HStack(spacing: 6) {
-                        Text(item.3)
-                            .font(.headline)
-                            .foregroundColor(.white)
-
-                        Image(systemName: "chevron.right")
-                            .foregroundColor(.gray.opacity(0.7))
-                    }
+                    Text(item.deposit)
+                        .foregroundColor(.white)
+                        .font(.headline)
                 }
                 .padding(16)
 
-                // Divider except last row
-                if i < tx.count - 1 {
-                    Divider().padding(.leading, 66)
+                Divider().padding(.leading, 66)
+            }
+
+            // MARK: - Load More Button
+            if historyComp.visibleCount < historyComp.items.count {
+                Button(action: {
+                    withAnimation(.spring()) {
+                        historyComp.loadMore()
+                    }
+                }) {
+                    Text("Load More")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(.ultraThinMaterial)  // Apple liquid glass
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                )
+                                .shadow(color: Color.white.opacity(0.15), radius: 12)
+                        )
+                        .padding(.horizontal, 20)
+                        .padding(.top, 8)
                 }
             }
+
         }
         .background(
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
+            RoundedRectangle(cornerRadius: 22)
                 .fill(Color(red: 0.11, green: 0.11, blue: 0.12))
         )
     }
+
+    // MARK: - Date Formatter (2025-01-29 → 29/1/2025)
+    func formatDate(_ input: String) -> String {
+        let formatterIn = DateFormatter()
+        formatterIn.dateFormat = "yyyy-MM-dd"
+
+        let formatterOut = DateFormatter()
+        formatterOut.dateFormat = "d/M/yyyy"
+
+        if let date = formatterIn.date(from: input) {
+            return formatterOut.string(from: date)
+        }
+        return input
+    }
 }
-    
