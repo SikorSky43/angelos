@@ -7,6 +7,7 @@ struct DashboardView: View {
     @StateObject private var logoutService = LogoutService.shared
     @ObservedObject private var balanceService = Balance.shared
     @StateObject private var historycomp = HistoryComp.shared
+    @StateObject private var motion = MotionManager()
 
     let status = "Updated just now"
     let activity: [Double] = [0.2, 0.5, 0.8, 1.0, 0.65, 0.55, 0.7, 0.4, 0.35, 0.3, 0.25]
@@ -15,9 +16,13 @@ struct DashboardView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 24) {
-                    WalletCard()
+                    // ⬇️ REPLACED WalletCard() with the Apple-Cash-style animated card ⬇️
+                    CardViewRepresentable(focalPointOffset: $motion.focalPointOffset)
+                        .frame(height: 260)
+                        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
                         .padding(.horizontal, 20)
-                        .padding(.bottom, -6)
+
+
 
                     VStack(alignment: .leading, spacing: 6) {
                         HStack(spacing: 12) {
@@ -79,7 +84,10 @@ struct DashboardView: View {
             if !wallet.isEmpty {
                 historycomp.loadHistory(wallet: wallet)
             }
+            motion.start()
 
+               
+    
         }
     }
 

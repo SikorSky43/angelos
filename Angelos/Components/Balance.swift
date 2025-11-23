@@ -20,20 +20,12 @@ class Balance: ObservableObject {
         
         URLSession.shared.dataTask(with: request) { data, _, error in
             
-            if let error = error {
-             //   print("Network error:", error.localizedDescription)
-                return
-            }
             
             guard let data = data else {
               //  print("No data received")
                 return
             }
-            
-            // Debug JSON print
-            if let raw = String(data: data, encoding: .utf8) {
-               // print("Raw JSON from server:\n\(raw)")
-            }
+           
             
             do {
                 let response = try JSONDecoder().decode(responsedata.self, from: data)
