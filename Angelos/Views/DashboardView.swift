@@ -19,34 +19,49 @@ struct DashboardView: View {
             ScrollView {
                 VStack(spacing: 24) {
 
-                    // Apple Cash-style animated card
+                    // Apple Cash card
                     GlassCard(focalPointOffset: $motion.focalPointOffset)
 
-                    VStack(alignment: .leading, spacing: 6) {
-                                            HStack(spacing: 12) {
+                    // =========================================
+                    // MAIN GRID LAYOUT (APPLE CARD STYLE)
+                    // =========================================
+                    HStack(alignment: .top, spacing: 12) {
 
-                                                // NOW SHOWS INVESTMENT BALANCE TILE INSTEAD OF AVAILABLE BALANCE
-                                                BalanceTile(investment: investmentBalance)
+                        // LEFT COLUMN (two separate compact tiles)
+                        VStack(spacing: 12) {
 
-                                                ActivityTile(values: activity)
-                                            }
-                                            .frame(height: 105)
-                                            .padding(.horizontal, 20)
+                            // TOP LEFT TILE — Balance
+                            BalanceTile(investment: investmentBalance)
+                                .frame(height: 100)
 
-                        Text(status)
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                            .padding(.leading, 20)
+                            // BOTTOM LEFT TILE — Yearly Activity
+                            ActivityTile(values: activity)
+                                .frame(height: 120)
+                        }
+                        .frame(maxWidth: .infinity)
+
+                        // RIGHT COLUMN — Payment tall tile (same height as both left tiles)
+                        PaymentTallTile(dueInDays: 6) {
+                            showDepositPopup = true
+                        }
+                        .frame(width: 180, height: 220)   // EXACT FIX
                     }
+                    .padding(.horizontal, 20)
 
-                    // Transactions Section
+                    // =========================================
+
+                    Text(status)
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                        .padding(.leading, 20)
+
+                    // Transactions
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Latest Transactions")
                             .font(.title3).bold()
                             .foregroundColor(.white)
 
                         TransactionList()
-
                     }
                     .padding(.horizontal, 20)
                 }
@@ -78,7 +93,14 @@ struct DashboardView: View {
         .onAppear {
             loadBalances()
             motion.start()
+
+            // load history
+            TransactionService.shared.loadTransactions()
+
+            // OPTIONAL — If you use /api/transactions directly:
+            // HistoryComp.shared.loadTransactions()
         }
+
     }
 
     // MARK: - Load Balance & Investment
@@ -89,11 +111,11 @@ struct DashboardView: View {
             balanceService.getBalance(email: email)
 
             let inv = UserDefaults.standard.string(forKey: "investment_balance") ?? "0.00"
-            investmentBalance = "£" + inv
+            investmentBalance = "$" + inv
         }
     }
 
-    // MARK: - Logout Handler
+    // MARK: - Logout
     private func handleLogout() {
         AuthService.shared.logout {
             showLogoutMessage = true

@@ -1,39 +1,33 @@
 import SwiftUI
 
 struct TransactionList: View {
-    @ObservedObject var historyComp = HistoryComp.shared
-    
-    var visibleHistory: [HistoryItem] {
-        Array(historyComp.items.prefix(historyComp.visibleCount))
+    @ObservedObject var transactionService = TransactionService.shared
+
+    // Use API data instead of HistoryComp
+    var visibleTransactions: [Transaction] {
+        transactionService.items
     }
 
     var body: some View {
         VStack(spacing: 0) {
 
             // MARK: - Transactions
-            ForEach(visibleHistory) { item in
+            ForEach(visibleTransactions) { item in
                 HStack(spacing: 14) {
 
-                    // Asset image instead of letter box
+                    // Asset Image
                     RoundedRectangle(cornerRadius: 10)
                         .fill(Color.gray.opacity(0.2))
                         .frame(width: 52, height: 52)
                         .overlay(
-                            AsyncImage(url: URL(string: item.assests)) { phase in
+                            AsyncImage(url: URL(string: item.asset)) { phase in
                                 switch phase {
                                 case .empty:
-                                    ProgressView()
-                                        .tint(.white)
-
+                                    ProgressView().tint(.white)
                                 case .success(let image):
-                                    image
-                                        .resizable()
-                                        .scaledToFit()
-
+                                    image.resizable().scaledToFit()
                                 case .failure(_):
-                                    Image(systemName: "photo")
-                                        .foregroundColor(.gray)
-
+                                    Image(systemName: "photo").foregroundColor(.gray)
                                 @unknown default:
                                     EmptyView()
                                 }
@@ -41,21 +35,21 @@ struct TransactionList: View {
                             .padding(6)
                         )
 
-
+                    // Text Info
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(item.type)
+                        Text(item.type.capitalized)
                             .foregroundColor(.white)
                             .font(.headline)
 
-                    
-                        Text("\(formatDate(item.date)) • Time: \(item.time)")
+                        Text(formatDisplayDate(item.date))
                             .foregroundColor(.gray)
                             .font(.caption)
                     }
 
                     Spacer()
 
-                    Text(item.deposit)
+                    // Amount
+                    Text(item.amount)
                         .foregroundColor(.white)
                         .font(.headline)
                 }
@@ -63,33 +57,6 @@ struct TransactionList: View {
 
                 Divider().padding(.leading, 66)
             }
-
-            // MARK: - Load More Button
-            if historyComp.visibleCount < historyComp.items.count {
-                Button(action: {
-                    withAnimation(.spring()) {
-                        historyComp.loadMore()
-                    }
-                }) {
-                    Text("Load More")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(
-                            RoundedRectangle(cornerRadius: 20)
-                                .fill(.ultraThinMaterial)  // Apple liquid glass
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 20)
-                                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
-                                )
-                                .shadow(color: Color.white.opacity(0.15), radius: 12)
-                        )
-                        .padding(.horizontal, 20)
-                        .padding(.top, 8)
-                }
-            }
-
         }
         .background(
             RoundedRectangle(cornerRadius: 22)
@@ -97,17 +64,12 @@ struct TransactionList: View {
         )
     }
 
-    // MARK: - Date Formatter (2025-01-29 → 29/1/2025)
-    func formatDate(_ input: String) -> String {
-        let formatterIn = DateFormatter()
-        formatterIn.dateFormat = "yyyy-MM-dd"
-
-        let formatterOut = DateFormatter()
-        formatterOut.dateFormat = "d/M/yyyy"
-
-        if let date = formatterIn.date(from: input) {
-            return formatterOut.string(from: date)
+    // MARK: - Format "2025-11-24 12:32:55"
+    func formatDisplayDate(_ ts: String) -> String {
+        let parts = ts.split(separator: " ")
+        if parts.count == 2 {
+            return "\(parts[0]) • \(parts[1])"
         }
-        return input
+        return ts
     }
 }

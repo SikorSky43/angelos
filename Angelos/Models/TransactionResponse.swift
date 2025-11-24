@@ -1,6 +1,6 @@
 import Foundation
 
-struct HistoryResponse: Codable {
-    let status: String
-    let history: [Transaction]?
+struct TransactionResponse: Codable {
+    let status: Bool
+    let data: [Transaction]
 }

@@ -1,15 +1,15 @@
 import Foundation
 
-nonisolated struct Transaction: Codable, Identifiable {
-    let userid = UUID()               // <-- local ID for SwiftUI
-    let type: String
-    let date: String
+struct Transaction: Identifiable, Codable {
+    let id: Int
+    let user_id: Int?
     let wallet_address: String
-    let asset: String
-    let amount: String
-    
+    let type: String
+    let asset: String        // FIXED: matches DB
+    let amount: String       // Laravel returns string
+    let date: String         // timestamp (includes time)
 
-    enum CodingKeys: String, CodingKey {
-        case type, date, time, deposit, assests
-    }
+    // No "time" field in DB
+
+    let user: user?
 }

@@ -17,9 +17,9 @@ struct mainApp: App {
                             DashboardView()
                                 .transition(.opacity)
                         } else {
-                            LoginView()
+                           LoginView()
                                 .transition(.opacity)
-                        }
+                       }
                     }
                 }
             }

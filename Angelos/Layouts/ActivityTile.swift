@@ -23,7 +23,7 @@ struct ActivityTile: View {
 
             MiniActivityChart(values: values)
         }
-        .padding(16)
+        .padding(15)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 22, style: .continuous)
