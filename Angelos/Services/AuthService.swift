@@ -1,53 +1,80 @@
 import Foundation
 
-// MARK: - Auth Service
 class AuthService {
 
     static let shared = AuthService()
-    private init() { }
+    private init() {}
 
-    func login(name: String, password: String, completion: @escaping (Result<responsedata, Error>) -> Void) {
-        guard let url = URL(string: "https://angeloscapital.com/api/login.php") else { return }
+    func login(email: String,
+               password: String,
+               completion: @escaping (Result<user, Error>) -> Void) {
+
+        guard let url = URL(string: "https://angeloscapital.com/api/login") else { return }
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Accept")
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
         let body: [String: String] = [
-            "name": name,
+            "email": email,
             "password": password
         ]
 
-        do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: body, options: [])
-        } catch {
-            completion(.failure(error))
-            return
-        }
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
 
-        URLSession.shared.dataTask(with: request) { data, _, error in
+        URLSession.shared.dataTask(with: request) { data, response, error in
+
             if let error = error {
-                DispatchQueue.main.async { completion(.failure(error)) }
+                DispatchQueue.main.async {
+                    completion(.failure(error))
+                }
                 return
             }
 
             guard let data = data else {
-                DispatchQueue.main.async { completion(.failure(NSError(domain: "No data", code: -1))) }
+                DispatchQueue.main.async {
+                    completion(.failure(NSError(domain: "Empty data", code: -1)))
+                }
                 return
             }
 
-            do {
-                let decoded = try JSONDecoder().decode(responsedata.self, from: data)
-                DispatchQueue.main.async { completion(.success(decoded)) }
-            } catch {
-                DispatchQueue.main.async { completion(.failure(error)) }
+            // Debug Laravel JSON
+            if let raw = String(data: data, encoding: .utf8) {
+                print("Laravel Login JSON →", raw)
             }
+
+            do {
+                struct LaravelLoginResponse: Codable {
+                    let status: String
+                    let token: String
+                    let user: user
+                }
+
+                let decoded = try JSONDecoder().decode(LaravelLoginResponse.self, from: data)
+
+                // save token
+                UserDefaults.standard.set(decoded.token, forKey: "auth_token")
+                UserDefaults.standard.set(decoded.user.email, forKey: "email")
+                UserDefaults.standard.set(decoded.user.wallet_address, forKey: "wallet_address")
+                UserDefaults.standard.set(decoded.user.card_balance, forKey: "card_balance")
+                UserDefaults.standard.set(decoded.user.investment_balance, forKey: "investment_balance")
+
+                DispatchQueue.main.async {
+                    completion(.success(decoded.user))
+                }
+
+            } catch {
+                DispatchQueue.main.async {
+                    print("JSON decode error:", error.localizedDescription)
+                    completion(.failure(error))
+                }
+            }
+
         }.resume()
     }
 
-    // ------------------------------------------------------
-    // MARK: - LOGOUT HANDLER (NEW)
-    // ------------------------------------------------------
+
     func logout(completion: (() -> Void)? = nil) {
         LogoutService.shared.logout()
         completion?()

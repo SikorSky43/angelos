@@ -4,59 +4,49 @@ internal import Combine
 
 class LoginService: ObservableObject {
 
-    @Published var name: String = ""
+    @Published var email: String = ""
     @Published var password: String = ""
 
     @Published var isLoading = false
     @Published var isLoggedIn = false
     @Published var showMessage = false
     @Published var messageText = ""
-    
+
     func logout() {
         isLoggedIn = false
+        UserDefaults.standard.removeObject(forKey: "auth_token")
+        UserDefaults.standard.removeObject(forKey: "email")
+        UserDefaults.standard.removeObject(forKey: "wallet_address")
+        UserDefaults.standard.removeObject(forKey: "card_balance")
+        UserDefaults.standard.removeObject(forKey: "investment_balance")
     }
 
     func login() {
 
-        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedPassword = password.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        guard !trimmedName.isEmpty, !trimmedPassword.isEmpty else {
-            messageText = "Please enter name and password."
+        guard !trimmedEmail.isEmpty, !trimmedPassword.isEmpty else {
+            messageText = "Please enter email and password."
             showMessage = true
             return
         }
 
         isLoading = true
 
-        AuthService.shared.login(name: trimmedName, password: trimmedPassword) { result in
+        AuthService.shared.login(email: trimmedEmail, password: trimmedPassword) { result in
             DispatchQueue.main.async {
+
                 self.isLoading = false
 
                 switch result {
-                case .success(let response):
-                    if response.status == "success", let user = response.user {
 
-                        // 🔥 SAVE USERNAME SO DASHBOARD CAN LOAD BALANCE
-                        UserDefaults.standard.set(user.name, forKey: "username")
-                        
-                        // SAVE WALLET ADDRESS HERE
-                        UserDefaults.standard.set(user.wallet_address ?? "", forKey: "wallet_address")
-
-                        // Save user globally
-                        LogoutService.shared.login(user: user)
-
-                        self.isLoggedIn = true
-
-                    }
-                    
-                    else {
-                        self.messageText = "Login failed: \(response.message)"
-                        self.showMessage = true
-                    }
+                case .success(let user):
+                    LogoutService.shared.login(user: user)
+                    self.isLoggedIn = true
 
                 case .failure(let error):
-                    self.messageText = "Error: \(error.localizedDescription)"
+                    self.messageText = "Login failed: \(error.localizedDescription)"
                     self.showMessage = true
                 }
             }
@@ -64,7 +54,7 @@ class LoginService: ObservableObject {
     }
 
     // ------------------------------------------------------
-    // MARK: - Forgot Password Email Function (NEW)
+    // MARK: - Forgot Password Email
     // ------------------------------------------------------
     func sendForgotPasswordEmail() {
         let email = "Helpme@angeloscapital.com"

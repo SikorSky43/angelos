@@ -1,29 +1,18 @@
-//
-//  BlanceTile.swift
-//  Angelos
-//
-//  Created by BlackBird on 20/11/25.
-//
-
-import Foundation
 import SwiftUI
-// ------------------------------------------------------
-// MARK: - Balance Tile
-// ------------------------------------------------------
 
 struct BalanceTile: View {
-    let balance: String
+    let investment: String
 
     var body: some View {
         VStack {
-            Text("Available Balance")
+            Text("Total Balance")
                 .font(.headline)
                 .foregroundColor(.white.opacity(0.95))
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             Spacer(minLength: 0)
 
-            Text(balance)
+            Text(investment)
                 .font(.system(size: 32, weight: .bold))
                 .foregroundColor(.white)
                 .minimumScaleFactor(0.8)

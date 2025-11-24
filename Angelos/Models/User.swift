@@ -7,13 +7,11 @@
 
 import Foundation
 
-nonisolated struct user: Codable {
+struct user: Codable {
     let id: Int?
-    let name: String
-    let amount: String
-    let password: String?
-    let wallet_address: String?   // ← ADD THIS
-
+    let name: String?                // ← Laravel returns null
+    let email: String
+    let wallet_address: String?
+    let card_balance: String
+    let investment_balance: String
 }
-
-

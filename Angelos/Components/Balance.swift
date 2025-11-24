@@ -3,53 +3,44 @@ internal import Combine
 
 class Balance: ObservableObject {
     static let shared = Balance()
-    private init() { }
-    
+    private init() {}
+
     @Published var balance: String = "£0.00"
-    
-    func getBalance(name: String) {
-        guard let url = URL(string: "https://angeloscapital.com/api/balance.php") else { return }
-        
+
+    func getBalance(email: String) {
+        guard let url = URL(string: "https://angeloscapital.com/api/balance") else { return }
+
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        // PHP API expects: { "name": "xxxx" }
-        let body: [String: Any] = ["name": name]
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let body: [String: Any] = ["email": email]
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
-        
-        URLSession.shared.dataTask(with: request) { data, _, error in
-            
-            
-            guard let data = data else {
-              //  print("No data received")
-                return
+
+        URLSession.shared.dataTask(with: request) { data, _, _ in
+            guard let data = data else { return }
+
+            if let raw = String(data: data, encoding: .utf8) {
+                print("Balance JSON:", raw)
             }
-           
-            
+
+            struct BalanceResponse: Codable {
+                let status: String
+                let card_balance: String
+                let investment_balance: String
+            }
+
             do {
-                let response = try JSONDecoder().decode(responsedata.self, from: data)
-                
+                let decoded = try JSONDecoder().decode(BalanceResponse.self, from: data)
                 DispatchQueue.main.async {
-                    if response.status == "success",
-                       let amountStr = response.user?.amount {
-                        
-                        // SHOW EXACT STRING FROM DATABASE
-                        self.balance = "£" + amountStr
-                        
-                    } else {
-                    //    print("API returned error:", response.message)
-                        self.balance = "£0.00"
-                    }
+                    self.balance = "£" + decoded.card_balance
+                    UserDefaults.standard.set(decoded.investment_balance, forKey: "investment_balance")
                 }
-                
             } catch {
-               // print("JSON decode error:", error.localizedDescription)
-                DispatchQueue.main.async {
-                    self.balance = "£0.00"
-                }
+                print("Decode error:", error)
             }
-            
-        }.resume()
+        }
+        .resume()
     }
+
 }

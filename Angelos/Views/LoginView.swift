@@ -21,7 +21,7 @@ struct LoginView: View {
                     }
 
                     VStack(spacing: 16) {
-                        TextField("Name", text: $vm.name)
+                        TextField("Email", text: $vm.email)
                             .textInputAutocapitalization(.never)
                             .padding()
                             .background(Color.white.opacity(0.08))
@@ -63,17 +63,17 @@ struct LoginView: View {
             // MARK: - Forgot Password ALERT (NEW)
             // ------------------------------------------------------
             .alert("Reset Your Password", isPresented: $showForgotPassword) {
-                
-                // OPEN MAIL APP
+
                 Button("Send Email") {
                     vm.sendForgotPasswordEmail()
                 }
 
                 Button("Cancel", role: .cancel) {}
-                
+
             } message: {
                 Text("To reset your password, send an email to:\nHelpme@angeloscapital.com")
             }
+
 
             .navigationDestination(isPresented: $vm.isLoggedIn) {
                 DashboardView()
