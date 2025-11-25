@@ -8,7 +8,7 @@
 import Foundation
 
 struct user: Codable {
-    let id: Int?
+    let user_id: Int
     let name: String?                // ← Laravel returns null
     let email: String
     let wallet_address: String?

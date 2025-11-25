@@ -13,7 +13,7 @@ class TransactionService: ObservableObject {
             guard let data = data else { return }
 
             if let raw = String(data: data, encoding: .utf8) {
-                print("Raw transaction JSON:", raw)
+             //   print("Raw transaction JSON:", raw)
             }
 
             do {
@@ -24,7 +24,7 @@ class TransactionService: ObservableObject {
                 }
 
             } catch {
-                print("Decode error:", error)
+              //  print("Decode error:", error)
             }
 
         }.resume()

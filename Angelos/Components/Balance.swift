@@ -21,7 +21,7 @@ class Balance: ObservableObject {
             guard let data = data else { return }
 
             if let raw = String(data: data, encoding: .utf8) {
-                print("Balance JSON:", raw)
+               // print("Balance JSON:", raw)
             }
 
             struct BalanceResponse: Codable {
@@ -37,7 +37,7 @@ class Balance: ObservableObject {
                     UserDefaults.standard.set(decoded.investment_balance, forKey: "investment_balance")
                 }
             } catch {
-                print("Decode error:", error)
+              //  print("Decode error:", error)
             }
         }
         .resume()

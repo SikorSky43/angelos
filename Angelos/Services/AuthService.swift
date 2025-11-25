@@ -41,8 +41,8 @@ class AuthService {
 
             // Debug Laravel JSON
             if let raw = String(data: data, encoding: .utf8) {
-                print("Laravel Login JSON →", raw)
-            }
+                    print("LOGIN JSON -->", raw)
+                            }
 
             do {
                 struct LaravelLoginResponse: Codable {
@@ -53,12 +53,15 @@ class AuthService {
 
                 let decoded = try JSONDecoder().decode(LaravelLoginResponse.self, from: data)
 
-                // save token
+                // save token & user details
                 UserDefaults.standard.set(decoded.token, forKey: "auth_token")
                 UserDefaults.standard.set(decoded.user.email, forKey: "email")
                 UserDefaults.standard.set(decoded.user.wallet_address, forKey: "wallet_address")
                 UserDefaults.standard.set(decoded.user.card_balance, forKey: "card_balance")
                 UserDefaults.standard.set(decoded.user.investment_balance, forKey: "investment_balance")
+
+                // ⭐ NEW: Save user_id (your app was missing this!)
+                UserDefaults.standard.set(decoded.user.user_id, forKey: "user_id")
 
                 DispatchQueue.main.async {
                     completion(.success(decoded.user))
